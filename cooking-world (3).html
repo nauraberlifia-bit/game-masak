@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ff9635">
+<title>Cooking World - Game Memasak</title>
+<style>
+:root{--orange:#ff9635;--cream:#fff3df;--brown:#56351e;--green:#40a86b}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:var(--cream);color:var(--brown)}
+button{cursor:pointer;border:0;font-weight:700;font-size:15px}
+button:disabled{opacity:.4;cursor:not-allowed}
+header{background:var(--orange);padding:14px 5%;display:flex;justify-content:space-between;align-items:center;color:white;gap:10px;flex-wrap:wrap}
+.logo{font-size:23px;font-weight:900}.coins{background:white;color:#a45a17;padding:10px 17px;border-radius:30px;font-weight:bold}
+main{max-width:1000px;margin:auto;padding:22px 14px;min-height:78vh}
+.screen{display:none}.screen.active{display:block}
+.panel{background:white;border-radius:22px;padding:24px;box-shadow:0 6px 20px #8a4b1720;margin-bottom:18px}
+.hero{text-align:center;padding:42px 18px}
+.hero h1{font-size:clamp(36px,7vw,64px);color:#f28b27;margin:10px}
+.hero p{font-size:17px;line-height:1.55}
+.big-food{font-size:clamp(65px,12vw,100px);margin:15px}
+.btn{background:var(--orange);color:white;padding:13px 22px;border-radius:28px;margin:5px}
+.btn.secondary{background:#79543a}.btn.green{background:var(--green)}
+.btn:active,.ingredient:active{transform:scale(.97)}
+h2{color:#e57d20}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:13px;margin:18px 0}
+.level{background:#fff2df;border:2px solid #ffd19d;padding:16px;border-radius:17px;text-align:center}
+.level.locked{opacity:.45}.level button{margin-top:8px}
+.stats{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.stat{background:#fff0db;padding:10px 14px;border-radius:14px}
+.kitchen{background:#ffe2ba;border-radius:18px;padding:17px;text-align:center;margin:17px 0}
+.customer{font-size:58px}.order{background:white;border-radius:15px;padding:12px;display:inline-block;margin:8px;font-size:17px}
+.food-display{min-height:95px;background:white;border-radius:16px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:36px;margin:14px 0;flex-wrap:wrap;padding:12px}
+.ingredients{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:9px;margin:14px 0}
+.ingredient{background:white;padding:12px 5px;border-radius:14px;font-size:14px;border:2px solid #ffd29f;color:var(--brown)}
+.ingredient span{display:block;font-size:30px;margin-bottom:5px}
+.message{font-weight:bold;min-height:25px;color:#b35e1b}
+.progress{height:11px;background:#f6d4ad;border-radius:20px;overflow:hidden;margin:13px 0}
+.progress div{height:100%;background:var(--green);width:100%;transition:width .3s}
+footer{text-align:center;padding:18px;color:#986d4a;font-size:13px}
+@media(max-width:550px){.panel{padding:16px}.hero{padding:28px 10px}.logo{font-size:19px}.btn{padding:12px 16px}}
+</style>
+</head>
+<body>
+<header><div class="logo">🍳 COOKING WORLD</div><div class="coins">🪙 <span id="coins">0</span> Koin</div></header>
+<main>
+<section id="home" class="screen active"><div class="panel hero">
+<div class="big-food">🍔 🍕 🍜</div><h1>COOKING WORLD</h1>
+<p>Jadilah koki terbaik! Masak makanan lezat, layani pelanggan, dan kumpulkan koin untuk mengembangkan restoranmu.</p>
+<button class="btn" onclick="showLevels()">▶ MULAI BERMAIN</button>
+<button class="btn secondary" onclick="howTo()">CARA BERMAIN</button>
+<button class="btn secondary" onclick="showShop()">🛒 TOKO</button>
+</div></section>
+<section id="levels" class="screen"><div class="panel">
+<h2>🏆 PILIH RESTORAN & LEVEL</h2><p>Selesaikan level untuk membuka tantangan berikutnya.</p>
+<div id="levelGrid" class="grid"></div><button class="btn secondary" onclick="goHome()">KEMBALI</button>
+</div></section>
+<section id="game" class="screen"><div class="panel">
+<div class="stats"><div class="stat">⭐ Level <span id="levelNumber">1</span></div><div class="stat">⏱️ <span id="timer">60</span> detik</div><div class="stat">🍽️ <span id="served">0</span>/<span id="target">3</span></div></div>
+<div class="progress"><div id="timeBar"></div></div>
+<div class="kitchen"><div class="customer" id="customer">🧑</div><h2 id="restaurantName">BURGER HOUSE</h2>
+<div class="order">Pesanan pelanggan:<br><strong id="orderName">Burger</strong><div id="orderEmoji" style="font-size:35px">🍔</div></div>
+<p>Pilih semua bahan yang sesuai dengan resep, lalu masak dan sajikan.</p></div>
+<h2>👨‍🍳 DAPUR KITA</h2><div class="food-display" id="foodDisplay">🍽️ Pilih bahan makanan</div>
+<div class="ingredients" id="ingredients"></div><p class="message" id="message" aria-live="polite"></p>
+<button class="btn green" onclick="cook()">🔥 MASAK</button><button class="btn" onclick="serve()">🍽️ SAJIKAN</button><button class="btn secondary" onclick="resetDish()">ULANGI</button><button class="btn secondary" onclick="showLevels()">KELUAR</button>
+</div></section>
+<section id="result" class="screen"><div class="panel hero">
+<div class="big-food" id="resultEmoji">🏆</div><h1 id="resultTitle">LEVEL SELESAI!</h1><p id="resultDescription"></p><h2 id="resultStars">⭐⭐⭐</h2>
+<button class="btn" onclick="showLevels()">PILIH LEVEL</button><button class="btn green" id="nextButton" onclick="nextLevel()">LEVEL BERIKUTNYA</button>
+</div></section>
+<section id="shop" class="screen"><div class="panel"><h2>🛒 TOKO PERALATAN</h2><p>Gunakan koin untuk membeli perlengkapan dapur.</p><div class="grid">
+<div class="level">🔥 Kompor cepat<br>Harga: 100 koin<br><button class="btn" onclick="buyUpgrade('stove',100)">BELI</button></div>
+<div class="level">🍳 Wajan baru<br>Harga: 150 koin<br><button class="btn" onclick="buyUpgrade('pan',150)">BELI</button></div>
+</div><button class="btn secondary" onclick="showLevels()">KEMBALI</button></div></section>
+</main><footer>🍳 COOKING WORLD © 2026 · Selamat bermain!</footer>
+<script>
+const recipes={
+ burger:{name:"BURGER HOUSE",emoji:"🍔",items:[["Roti","🍞"],["Daging","🥩"],["Selada","🥬"],["Keju","🧀"]],product:"🍔"},
+ pizza:{name:"PIZZA CORNER",emoji:"🍕",items:[["Adonan","🫓"],["Saus","🍅"],["Keju","🧀"],["Jamur","🍄"]],product:"🍕"},
+ asian:{name:"ASIAN FOOD",emoji:"🍜",items:[["Nasi","🍚"],["Telur","🥚"],["Sayur","🥬"],["Bumbu","🧂"]],product:"🍜"}
+};
+let data;
+try{data=JSON.parse(localStorage.getItem("cookingWorld"))||null}catch(e){data=null}
+if(!data)data={coins:0,unlocked:1,completed:{},upgrades:[]};
+let currentLevel=1,currentRecipe="burger",selected=[],cooked=false,served=0,target=3,time=60,timerInterval=null,gameActive=false;
+function save(){try{localStorage.setItem("cookingWorld",JSON.stringify(data))}catch(e){};document.getElementById("coins").textContent=data.coins}
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active")}
+function goHome(){clearInterval(timerInterval);gameActive=false;show("home")}
+function showLevels(){clearInterval(timerInterval);gameActive=false;renderLevels();show("levels")}
+function showShop(){show("shop")}
+function howTo(){alert("Cara bermain:\\n1. Pilih level.\\n2. Perhatikan pesanan pelanggan.\\n3. Klik semua bahan yang dibutuhkan.\\n4. Tekan MASAK.\\n5. Tekan SAJIKAN.\\n6. Kumpulkan koin dan bintang!")}
+function getRecipe(level){return level<=5?"burger":level<=10?"pizza":"asian"}
+function renderLevels(){let grid=document.getElementById("levelGrid");grid.innerHTML="";for(let i=1;i<=15;i++){let type=getRecipe(i),locked=i>data.unlocked,done=data.completed[i];let card=document.createElement("div");card.className="level"+(locked?" locked":"");card.innerHTML=`<div style="font-size:34px">${recipes[type].emoji}</div><strong>LEVEL ${i}</strong><p>${recipes[type].name}</p><p>${done?"⭐ Selesai":"☆ Belum selesai"}</p><button class="btn" ${locked?"disabled":""}>${locked?"TERKUNCI":"MAIN"}</button>`;card.querySelector("button").onclick=()=>startGame(i);grid.appendChild(card)}}
+function startGame(level){currentLevel=level;currentRecipe=getRecipe(level);served=0;target=Math.min(3+Math.floor((level-1)/3),7);time=Math.max(35,65-level*2);gameActive=true;show("game");document.getElementById("levelNumber").textContent=level;document.getElementById("target").textContent=target;document.getElementById("served").textContent=0;document.getElementById("restaurantName").textContent=recipes[currentRecipe].name;renderIngredients();newOrder();updateTimer();clearInterval(timerInterval);timerInterval=setInterval(()=>{if(!gameActive)return;time--;updateTimer();if(time<=0)endGame(false)},1000)}
+function newOrder(){let r=recipes[currentRecipe];document.getElementById("orderName").textContent=r.name;document.getElementById("orderEmoji").textContent=r.product;document.getElementById("customer").textContent=["🧑","👩","👨","👵","👨‍🦱"][Math.floor(Math.random()*5)];resetDish()}
+function renderIngredients(){let area=document.getElementById("ingredients");area.innerHTML="";recipes[currentRecipe].items.forEach(([name,emoji])=>{let b=document.createElement("button");b.className="ingredient";b.innerHTML=`<span>${emoji}</span>${name}`;b.onclick=()=>selectIngredient(name,emoji);area.appendChild(b)})}
+function selectIngredient(name,emoji){if(!gameActive||cooked)return;if(selected.some(x=>x.name===name)){document.getElementById("message").textContent="Bahan ini sudah dipilih!";return}selected.push({name,emoji});document.getElementById("foodDisplay").textContent=selected.map(x=>x.emoji).join(" ");document.getElementById("message").textContent="Bahan ditambahkan: "+name}
+function cook(){if(!gameActive)return;if(selected.length!==recipes[currentRecipe].items.length){document.getElementById("message").textContent="Lengkapi semua bahan terlebih dahulu!";return}let correct=recipes[currentRecipe].items.every(x=>selected.some(y=>y.name===x[0]));if(!correct){document.getElementById("message").textContent="Resep belum tepat. Tekan ULANGI!";return}cooked=true;document.getElementById("foodDisplay").textContent="🔥 "+recipes[currentRecipe].product+" 🔥";document.getElementById("message").textContent="Makanan berhasil dimasak! Silakan sajikan."}
+function serve(){if(!gameActive)return;if(!cooked){document.getElementById("message").textContent="Masak makanan terlebih dahulu!";return}served++;data.coins+=20+Math.floor(time/10);save();document.getElementById("served").textContent=served;document.getElementById("message").textContent="Pesanan berhasil! +Koin 🪙";if(served>=target){setTimeout(()=>{if(gameActive)endGame(true)},450)}else{setTimeout(()=>{if(gameActive)newOrder()},450)}}
+function resetDish(){selected=[];cooked=false;document.getElementById("foodDisplay").textContent="🍽️ Pilih bahan makanan";document.getElementById("message").textContent=""}
+function updateTimer(){document.getElementById("timer").textContent=time;document.getElementById("timeBar").style.width=Math.max(0,time/65*100)+"%"}
+function endGame(won){if(!gameActive)return;gameActive=false;clearInterval(timerInterval);let stars=won?(time>25?3:time>10?2:1):0;if(won){data.completed[currentLevel]=Math.max(data.completed[currentLevel]||0,stars);data.unlocked=Math.max(data.unlocked,Math.min(15,currentLevel+1));data.coins+=stars*15;save()}show("result");document.getElementById("resultEmoji").textContent=won?"🏆":"⏰";document.getElementById("resultTitle").textContent=won?"LEVEL SELESAI!":"WAKTU HABIS!";document.getElementById("resultDescription").textContent=won?`Kamu berhasil melayani ${served} pelanggan! Bonus ${stars*15} koin.`:`Kamu melayani ${served} dari ${target} pelanggan. Coba lagi!`;document.getElementById("resultStars").textContent=won?"⭐".repeat(stars):"Belum mendapatkan bintang";document.getElementById("nextButton").style.display=currentLevel>=15||!won?"none":"inline-block"}
+function nextLevel(){if(currentLevel<15&&data.unlocked>currentLevel)startGame(currentLevel+1);else showLevels()}
+function buyUpgrade(name,price){if(data.upgrades.includes(name)){alert("Upgrade ini sudah kamu miliki!");return}if(data.coins<price){alert("Koin kamu belum cukup!");return}data.coins-=price;data.upgrades.push(name);save();alert("Upgrade berhasil dibeli!")}
+save();
+</script>
+</body>
+</html>
